@@ -39,11 +39,11 @@ class SimulatedDevice(threading.Thread):
         self.name = name
         self.base_url = base_url.rstrip("/")
         self.interval = interval
-        self.stop_after = stop_after
-        self._stop = threading.Event()
+        self._stop_event_event_after = stop_after
+        self._stop_event = threading.Event()
 
     def stop(self) -> None:
-        self._stop.set()
+        self._stop_event.set()
 
     def run(self) -> None:
         # Register. 409 on restart is fine — someone registered us already.
@@ -61,8 +61,8 @@ class SimulatedDevice(threading.Thread):
             return
 
         started = time.monotonic()
-        while not self._stop.is_set():
-            if self.stop_after and (time.monotonic() - started) >= self.stop_after:
+        while not self._stop_event.is_set():
+            if self._stop_event_event_after and (time.monotonic() - started) >= self._stop_event_event_after:
                 print(f"[{self.device_id}] stopping (--kill-at)")
                 return
             try:
@@ -79,7 +79,7 @@ class SimulatedDevice(threading.Thread):
             except requests.RequestException as e:
                 print(f"[{self.device_id}] heartbeat failed: {e}")
             # Sleep in small chunks so Ctrl-C is responsive.
-            self._stop.wait(self.interval)
+            self._stop_event.wait(self.interval)
 
 
 def main() -> None:

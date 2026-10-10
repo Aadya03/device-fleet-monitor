@@ -9,6 +9,7 @@ from threading import Lock
 from typing import List, Optional
 
 from src.models import Device
+from copy import copy
 
 
 class DeviceAlreadyExists(Exception):
@@ -35,13 +36,11 @@ class DeviceStore:
         with self._lock:
             if device_id not in self._devices:
                 raise DeviceNotFound(device_id)
-            return self._devices[device_id]
+            return copy(self._devices[device_id])
 
     def all(self) -> List[Device]:
-        # Snapshot under the lock so the caller can iterate safely while
-        # heartbeats continue to arrive on other threads.
         with self._lock:
-            return list(self._devices.values())
+            return [copy(d) for d in self._devices.values()]
 
     def record_heartbeat(
         self,
