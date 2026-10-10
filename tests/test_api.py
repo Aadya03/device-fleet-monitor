@@ -113,3 +113,10 @@ def test_status_filter(client: TestClient, clock: FakeClock):
 
     offline = client.get("/devices?status=OFFLINE").json()
     assert [d["id"] for d in offline] == ["d2"]
+
+def test_health_endpoint(client: TestClient):
+    r = client.get("/health")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "ok"
+    assert "time" in body

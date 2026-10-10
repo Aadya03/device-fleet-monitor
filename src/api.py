@@ -90,4 +90,8 @@ def create_app(store: Optional[DeviceStore] = None, clock: Clock = _default_cloc
     def summary() -> SummaryOut:
         return SummaryOut(**summarize(store.all(), clock()))
 
+    @app.get("/health")
+    def health() -> dict:
+        return {"status": "ok", "time": clock().isoformat()}
+
     return app
